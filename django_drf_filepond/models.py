@@ -46,9 +46,6 @@ class FilePondUploadSystemStorage(FileSystemStorage):
         super(FilePondUploadSystemStorage, self).__init__(**kwargs)
 
 
-storage = FilePondUploadSystemStorage()
-
-
 @deconstructible
 class FilePondLocalStoredStorage(FileSystemStorage):
     """
@@ -82,6 +79,9 @@ class DrfFilePondStoredStorage(LazyObject):
             self._wrapped = FilePondLocalStoredStorage()
         else:
             self._wrapped = storage_backend
+
+
+storage = DrfFilePondStoredStorage()
 
 
 def get_upload_path(instance, filename):
