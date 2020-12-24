@@ -337,54 +337,12 @@ def delete_stored_upload(upload_id, delete_file=False):
     if not delete_file:
         return True
 
-    # If we got the stored file record and delete_file is True, make sure
-    # that the storage backend is set up and we have access to it.
-    # TODO: If the storage backend is not initialised, init now - this
-    # will be removed when this module is refactored into a class.
-    if not storage_backend_initialised:
-        _init_storage_backend()
+    if not default_storage.exists(su.file.url):
+        LOG.error('Stored upload file [%s] with upload_id [%s] is not '
+                  'found on remote file store' % (su.file.url, upload_id))
+        raise FileNotFoundError(
+            'File [%s] for stored upload with id [%s] not found on remote'
+            ' file store.' % (su.file.url, upload_id))
 
-    if storage_backend:
-        LOG.debug('delete_stored_upload: Using a remote storage '
-                  'service: [%s]' % (type(storage_backend).__name__))
-        file_path_base = ''
-    else:
-        LOG.debug('delete_stored_upload: Using local storage backend.')
-        if ((not hasattr(local_settings, 'FILE_STORE_PATH')) or
-                (not local_settings.FILE_STORE_PATH) or
-                (not os.path.exists(local_settings.FILE_STORE_PATH)) or
-                (not os.path.isdir(local_settings.FILE_STORE_PATH))):
-            raise ConfigurationError('The file upload settings are not '
-                                     'configured correctly.')
-
-        file_path_base = local_settings.FILE_STORE_PATH
-
-    file_path = os.path.join(file_path_base, su.file.name)
-    if storage_backend:
-        if not storage_backend.exists(file_path):
-            LOG.error('Stored upload file [%s] with upload_id [%s] is not '
-                      'found on remote file store' % (file_path, upload_id))
-            raise FileNotFoundError(
-                'File [%s] for stored upload with id [%s] not found on remote'
-                ' file store.' % (file_path, upload_id))
-        storage_backend.delete(file_path)
-    # Else delete local file
-    else:
-        if ((not os.path.exists(file_path)) or
-                (not os.path.isfile(file_path))):
-            LOG.error('File [%s] for stored upload [%s] not found on '
-                      'local disk' % (file_path, upload_id))
-            raise FileNotFoundError('File [%s] to delete was not found on '
-                                    'the local disk' % file_path)
-
-        # We now know that the file exists locally and is not a directory
-        try:
-            os.remove(file_path)
-        except OSError as e:
-            LOG.error('Error removing requested file: %s' % str(e))
-            raise e
-
-        # TODO: Need to look at how best to delete directories that may have
-        # been created to store the file. For now, we just delete the file.
-
+    default_storage.delete(su.file.url)
     return True
