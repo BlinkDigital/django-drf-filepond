@@ -337,12 +337,12 @@ def delete_stored_upload(upload_id, delete_file=False):
     if not delete_file:
         return True
 
-    if not default_storage.exists(su.file.url):
+    if not default_storage.exists(su.file.name):
         LOG.error('Stored upload file [%s] with upload_id [%s] is not '
-                  'found on remote file store' % (su.file.url, upload_id))
+                  'found on remote file store' % (su.file.name, upload_id))
         raise FileNotFoundError(
             'File [%s] for stored upload with id [%s] not found on remote'
-            ' file store.' % (su.file.url, upload_id))
+            ' file store.' % (su.file.name, upload_id))
 
-    default_storage.delete(su.file.url)
+    default_storage.delete(su.file.name)
     return True
