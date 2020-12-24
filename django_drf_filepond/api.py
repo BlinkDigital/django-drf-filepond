@@ -11,6 +11,8 @@ import ntpath
 import os
 import shutil
 
+from django.core.files.storage import default_storage
+
 import django_drf_filepond.drf_filepond_settings as local_settings
 from django.core.exceptions import ImproperlyConfigured
 import re
@@ -184,7 +186,7 @@ def _store_upload_remote(destination_file_path, destination_file_name,
     su = None
     destination_file = os.path.join(destination_file_path, target_filename)
     try:
-        storage_backend.save(destination_file, temp_upload.file)
+        default_storage.save(destination_file, temp_upload.file)
         su = StoredUpload(upload_id=temp_upload.upload_id,
                           file=destination_file,
                           uploaded=temp_upload.uploaded,
