@@ -291,13 +291,13 @@ def get_stored_upload_file_data(stored_upload):
     # in the file store location
     file_path = os.path.join(file_path_base, stored_upload.file.name)
     if storage_backend:
-        if not storage_backend.exists(file_path):
+        if not default_storage.exists(file_path):
             LOG.error('File [%s] for upload_id [%s] not found on remote '
                       'file store' % (file_path, stored_upload.upload_id))
             raise FileNotFoundError(
                 'File [%s] for upload_id [%s] not found on remote file '
                 'store.' % (file_path, stored_upload.upload_id))
-        file_data = stored_upload.file.read()
+        file_data = default_storage.open(file_path).read()
     else:
         if ((not os.path.exists(file_path)) or
                 (not os.path.isfile(file_path))):
