@@ -1,5 +1,5 @@
 Django>=1.11
-djangorestframework>=3.9.1
+djangorestframework>=3.18.2
 django-storages>=1.8
 httpretty==0.9.6
 shortuuid==0.5.0
